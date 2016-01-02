@@ -20,9 +20,9 @@ npm i bluebird
 mv ../{question.js,sb-dump.js} .
 cd ..
 npm i bluebird xml2js jszip
-browserify -r bluebird -r xml2js -r jszip -r buffer -r crypto | uglifyjs --screw-ie8 > lib.js
+browserify -r bluebird -r xml2js -r jszip -r buffer -r crypto | uglifyjs --screw-ie8 -c -m > lib.js
 rm -rf node_modules
-uglifyjs --screw-ie8 main.js -o main1.js
+uglifyjs main.js --screw-ie8 -c -m -o main1.js
 \mv -f main{1,}.js
 cp ../src/{index.html,nginx.conf} .
 
