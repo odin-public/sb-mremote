@@ -86,7 +86,7 @@ var xmlItem = '{"Name":"","Type":"Container","Expanded":"False","Descr":"","Icon
         logSpan.removeChild(logSpan.lastChild);
       }
       var item = document.createElement('span');
-      item.style = 'color: ' + color + ';';
+      item.setAttribute('style', 'color: ' + color + ';');
       item.innerHTML = data;
       logSpan.insertBefore(item, null);
     }
