@@ -24,7 +24,7 @@ browserify -r bluebird -r xml2js -r jszip -r buffer -r crypto | uglifyjs --screw
 rm -rf node_modules
 uglifyjs main.js --screw-ie8 -c -m -o main1.js
 \mv -f main{1,}.js
-cp ../src/{index.html,nginx.conf} .
+cp ../src/index.html .
 
 [ "$1" = "install" ] || exit
 popd
