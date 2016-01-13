@@ -4,14 +4,74 @@ function capitalize(string) {
 }
 var xmlItem = '{"Name":"","Type":"Container","Expanded":"False","Descr":"","Icon":"mRemoteNG","Panel":"General","Username":"","Domain":"","Password":"","Hostname":"","Protocol":"SSH2","PuttySession":"Default Settings","Port":"22","ConnectToConsole":"False","UseCredSsp":"True","RenderingEngine":"IE","ICAEncryptionStrength":"EncrBasic","RDPAuthenticationLevel":"NoAuth","LoadBalanceInfo":"","Colors":"Colors16Bit","Resolution":"FitToWindow","AutomaticResize":"True","DisplayWallpaper":"False","DisplayThemes":"False","EnableFontSmoothing":"False","EnableDesktopComposition":"False","CacheBitmaps":"True","RedirectDiskDrives":"False","RedirectPorts":"False","RedirectPrinters":"False","RedirectSmartCards":"False","RedirectSound":"DoNotPlay","RedirectKeys":"False","Connected":"False","PreExtApp":"","PostExtApp":"","MacAddress":"","UserField":"","ExtApp":"","VNCCompression":"CompNone","VNCEncoding":"EncHextile","VNCAuthMode":"AuthVNC","VNCProxyType":"ProxyNone","VNCProxyIP":"","VNCProxyPort":"0","VNCProxyUsername":"","VNCProxyPassword":"","VNCColors":"ColNormal","VNCSmartSizeMode":"SmartSAspect","VNCViewOnly":"False","RDGatewayUsageMethod":"Never","RDGatewayHostname":"","RDGatewayUseConnectionCredentials":"Yes","RDGatewayUsername":"","RDGatewayPassword":"","RDGatewayDomain":"","InheritCacheBitmaps":"False","InheritColors":"False","InheritDescription":"False","InheritDisplayThemes":"False","InheritDisplayWallpaper":"False","InheritEnableFontSmoothing":"False","InheritEnableDesktopComposition":"False","InheritDomain":"False","InheritIcon":"False","InheritPanel":"False","InheritPassword":"False","InheritPort":"False","InheritProtocol":"False","InheritPuttySession":"False","InheritRedirectDiskDrives":"False","InheritRedirectKeys":"False","InheritRedirectPorts":"False","InheritRedirectPrinters":"False","InheritRedirectSmartCards":"False","InheritRedirectSound":"False","InheritResolution":"False","InheritAutomaticResize":"False","InheritUseConsoleSession":"False","InheritUseCredSsp":"False","InheritRenderingEngine":"False","InheritUsername":"False","InheritICAEncryptionStrength":"False","InheritRDPAuthenticationLevel":"False","InheritLoadBalanceInfo":"False","InheritPreExtApp":"False","InheritPostExtApp":"False","InheritMacAddress":"False","InheritUserField":"False","InheritExtApp":"False","InheritVNCCompression":"False","InheritVNCEncoding":"False","InheritVNCAuthMode":"False","InheritVNCProxyType":"False","InheritVNCProxyIP":"False","InheritVNCProxyPort":"False","InheritVNCProxyUsername":"False","InheritVNCProxyPassword":"False","InheritVNCColors":"False","InheritVNCSmartSizeMode":"False","InheritVNCViewOnly":"False","InheritRDGatewayUsageMethod":"False","InheritRDGatewayHostname":"False","InheritRDGatewayUseConnectionCredentials":"False","InheritRDGatewayUsername":"False","InheritRDGatewayPassword":"False","InheritRDGatewayDomain":"False"}',
   configs = {
+    'lin-ct-clean': {},
+    'lin-ct7-clean': {},
     'lin-mn': {
       'ep': ['endpoint']
     },
     'lin-pba': {
       'ep': ['endpoint'],
       'pba': ['pba']
+    },
+    'lin-default': {
+      'ep': ['endpoint'],
+      'pim': ['pim'],
+      'mysql': ['mysql'],
+      'dns': ['dns'],
+      'ng': ['lsh']
+    },
+    'lin-exch2010': {
+      'cp': ['cp'],
+      'pba': ['pba'],
+      'ep': ['endpoint'],
+      'mysql': ['mysql'],
+      'dns': ['dns'],
+      'ng': ['lsh'],
+      'ad1': ['ad1', 'rdp'],
+      'iis': ['iis', 'rdp'],
+      'wpe': ['wpe', 'rdp']
+    },
+    'lin-iis': {
+      'dns': ['dns'],
+      'ep': ['endpoint'],
+      'ad1': ['ad1', 'rdp'],
+      'iis71': ['iis71', 'rdp'],
+      'wpe': ['wpe', 'rdp']
+    },
+    'lin-mn-for-aps1.x': {
+      'ep': ['endpoint'],
+      'pba': ['pba']
+    },
+    'lin-mn-spconfig': {
+      'ep': ['endpoint']
+    },
+    'lin-pba-lsh': {
+      'cp': ['cp'],
+      'pba': ['pba'],
+      'ep': ['endpoint'],
+      'mysql': ['mysql'],
+      'dns': ['dns'],
+      'store': ['store'],
+      'pbadb': ['pbadb']
+    },
+    'lin-qmail': {
+      'cp': ['cp'],
+      'pba': ['pba'],
+      'ep': ['endpoint'],
+      'mysql': ['mysql'],
+      'dns': ['dns'],
+      'ng': ['lsh'],
+      'pim': ['pim'],
+      'qmail': ['qmail'],
+      'imp': ['imp'],
+      'spas': ['spamassassin'],
+      'drweb': ['drweb']
+    },
+    'win-mn': {
+      'win-mn': ['mn', 'rdp']
     }
   },
+  unknownConfigs = {},
   Promise = require('bluebird'),
   xml2js = Promise.promisifyAll(require('xml2js')),
   jszip = require('jszip'),
@@ -98,12 +158,18 @@ window['main-form'].addEventListener('submit', e => {
       var [name, org] = v.name.split('.'),
         dir = orgs[org],
         node = v.node,
-        hosts = configs[v.configuration] || {},
+        hosts = configs[v.configuration],
         shared = {
           password: v.password,
           description: `${v.poa}/${v.pba || 'none'}`,
           panel: `${folderName}: ${name}.${org}`
         };
+      if (!hosts) {
+        var names = unknownConfigs[v.configuration];
+        if (!names)
+          names = unknownConfigs[v.configuration] = [];
+        names.push(v);
+      }
       if (!dir) {
         orgs[org] = dir = [];
         orgsOrdered.push(org);
@@ -195,6 +261,8 @@ window['main-form'].addEventListener('submit', e => {
       rootNode.push(orgNode);
     });
     l.info(`Success: <a href="data:application/octet-stream;base64,${(new jszip()).file('confCons.xml', (new xml2js.Builder({xmldec: {'version': '1.0', 'encoding': 'utf-8'}})).buildObject(xmlConfig)).generate({type:'base64', compression: 'DEFLATE'})}" download="confCons.zip">confCons.zip</a>`);
+    if (Object.keys(unknownConfigs).length > 0)
+      console.log(unknownConfigs);
   }).catch(reason => {
     l.error(reason.message || reason);
   }).finally(() => {
