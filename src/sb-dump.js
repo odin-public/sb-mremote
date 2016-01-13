@@ -19,7 +19,7 @@ let stop,
   session;
 
 Promise.join(new Promise((resolve, reject) => {
-      https.request(loginUrl, resolve).on('error', reject).end();
+  https.request(loginUrl, resolve).on('error', reject).end();
 }), question('Username: ').then(user => Promise.join(user, question('Password: ', true)))).spread((response, creds) => {
   let tokenCookie = response.headers['set-cookie'].find(v => v.startsWith('csrftoken'));
   const [username, password] = creds,
