@@ -161,7 +161,7 @@ window['main-form'].addEventListener('submit', e => {
         hosts = configs[v.configuration],
         shared = {
           password: v.password,
-          description: `${v.poa}/${v.pba || 'none'}`,
+          description: `${v.poa}/${v.pba || 'none'}:${v.configuration}@${v.ip}`,
           panel: `${folderName}: ${name}.${org}`
         };
       if (!hosts) {
