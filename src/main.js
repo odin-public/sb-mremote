@@ -47,6 +47,12 @@ var xmlItem = '{"Name":"","Type":"Container","Expanded":"False","Descr":"","Icon
       'pbadb': ['pbadb'],
       'store': ['store']
     },
+    'lin-billing-new': {
+      'ep': ['endpoint'],
+      'pba': ['pba'],
+      'pbadb': ['pbadb'],
+      'store': ['store']
+    },
     'lin-ct-clean': {},
     'lin-ct7-clean': {},
     'lin-default': {
