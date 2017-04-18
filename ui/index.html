@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Sandbox dump -> mRemoteNG config</title>
+  <meta charset="utf-8">
+</head>
+<body>
+<form id="main-form">
+  <p><b>Press 'Enter' to get an up-to-date sandbox mRemoteNG config:</b></p>
+  <span>PuTTY session for HW nodes:</span>
+  <input id="putty-nodes" type="text" placeholder="Default Settings" autocomplete="on"><br/>
+  <span>PuTTY session for VEs:</span>
+  <input id="putty-ves" type="text" placeholder="Default Settings" autocomplete="on"><br/>
+  <span>Folder name:</span>
+  <input id="folder-name" type="text" placeholder="APS Demo" autocomplete="on"><br/>
+  <br/>
+  <button id="start" type="submit" disabled>Get sandbox config -></button> <span id="download-panel" hidden>Download: <a id="download-link" href="">test</a></span>
+  <br/>
+  <span id="log-span"></span>
+  <script src="main.js"></script>
+</form>
+</body>
+</html>
