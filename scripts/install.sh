@@ -5,7 +5,7 @@ DIR=/var/sb-mremote
 
 if [ -f './scripts/build.sh' ]; then # running from already-built tree
   [ ! -d './_build' ] && . ./scripts/build.sh
-  cd _build
+  cd ./_build
 fi
 
 [ -d $DIR ] && echo "'$DIR' already exists! Exiting!" && exit 1

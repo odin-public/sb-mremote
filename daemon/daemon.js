@@ -7,6 +7,7 @@ import { randomBytes } from 'crypto';
 import Promise from 'bluebird';
 import readCallback from 'read';
 import request from 'request-promise';
+import { RequestError } from 'request-promise/errors';
 
 import config from './config.json';
 
@@ -15,16 +16,19 @@ const HTTP = {
     UNAUTHORIZED: 401,
     FORBIDDEN: 403,
     NOT_FOUND: 404,
-    SERVER_ERROR: 500
+    SERVER_ERROR: 500,
+    READ_TIMEOUT: 598,
+    CONNECT_TIMEOUT: 599
   },
+  CODE_SOCKET_TIMEOUT = 'ESOCKETTIMEDOUT',
+  CODE_READ_TIMEOUT = 'ETIMEDOUT',
   BASE_URL = 'https://dev.apsstandard.org/',
   URL = {
     LOGIN: '/develop/admin/',
     LOGOUT: '/develop/admin/logout/',
     SB_DUMP: '/develop/admin/catalog/apscataloguser/sandboxes-dump'
   },
-  STRICT_SSL = config.strictSSL,
-  PROXY_REAL_IP_HEADER = config.proxyRealIPHeader,
+  { requsetOptions: REQUEST_OPTIONS, proxyRealIPHeader: PROXY_REAL_IP_HEADER } = config,
   LISTEN = {
     HOST: config.listen.host,
     PORT: config.listen.port
@@ -40,10 +44,10 @@ function l(text) {
 
 const cookies = request.jar(),
   read = Promise.promisify(readCallback),
-  requestPortal = request.defaults({ resolveWithFullResponse: true, jar: cookies, simple: false, strictSSL: STRICT_SSL });
+  requestPortal = request.defaults(Object.assign({ resolveWithFullResponse: true, jar: cookies, simple: false }, REQUEST_OPTIONS));
 
 let isLoggedIn = false,
-  serverTiming;
+  serverStartTime;
 
 function login(username, password) {
   l(`Attempting to login as: '${username}'...`);
@@ -83,9 +87,7 @@ function logout() {
     url: URL.LOGOUT,
     referer: URL.LOGIN
   }).then(({ statusCode }) => {
-    if (statusCode !== HTTP.OK) {
-      throw new Error(`Logout URL returned HTTP code '${statusCode}' (should be '${HTTP.OK}')!`);
-    }
+    if (statusCode !== HTTP.OK) throw new Error(`Logout URL returned HTTP code '${statusCode}' (should be '${HTTP.OK}')!`);
 
     isLoggedIn = false;
 
@@ -115,6 +117,8 @@ process
   .on('uncaughtException', unexpectedError)
   .on('unhandledRejection', unexpectedError);
 
+l('Getting CSRF token...');
+
 Promise.join(requestPortal.get(URL.LOGIN), read({ prompt: `'${urlParse(BASE_URL).host}' Username: ` }).then(username => {
   if (username.length === 0) throw new Error('Username cannot be empty');
 
@@ -123,7 +127,7 @@ Promise.join(requestPortal.get(URL.LOGIN), read({ prompt: `'${urlParse(BASE_URL)
 
     return password;
   })];
-}).all()).spread((response, [username, password]) => {
+}).all()).spread((_, [username, password]) => {
   return [username, password, login(username, password)];
 }).spread((username, password) => {
   l(`Attempting to bind: '${LISTEN.HOST}:${LISTEN.PORT}'...`);
@@ -154,7 +158,7 @@ Promise.join(requestPortal.get(URL.LOGIN), read({ prompt: `'${urlParse(BASE_URL)
     }
 
     if (url === '/uptime') {
-      let uptime = process.hrtime(serverTiming)[0];
+      let uptime = process.hrtime(serverStartTime)[0];
 
       lRequest(`Uptime was requested (${uptime} seconds)!`);
 
@@ -195,7 +199,7 @@ Promise.join(requestPortal.get(URL.LOGIN), read({ prompt: `'${urlParse(BASE_URL)
         if (statusCode !== HTTP.OK) {
           const error = new Error(`Sandbox dump URL responded with: '${body}`);
 
-          error.code = statusCode;
+          error.statusCode = statusCode;
           lRequest(`Sandbox dump request returned with HTTP '${statusCode}' (should be '${HTTP.OK}')!`);
 
           throw error;
@@ -211,7 +215,16 @@ Promise.join(requestPortal.get(URL.LOGIN), read({ prompt: `'${urlParse(BASE_URL)
       response.end(sbDump);
     }, error => {
       lRequest(`Failed to get sandbox dump: ${error.message}`);
-      response.statusCode = 'code' in error ? error.code : HTTP.SERVER_ERROR;
+
+      if (error instanceof RequestError) {
+        if (error.cause.code === CODE_SOCKET_TIMEOUT) {
+          error.statusCode = HTTP.CONNECT_TIMEOUT;
+        } else if (error.cause.code === CODE_READ_TIMEOUT) {
+          error.statusCode = HTTP.READ_TIMEOUT;
+        }
+      }
+      
+      response.statusCode = 'statusCode' in error ? error.statusCode : HTTP.SERVER_ERROR;
       response.end(JSON.stringify({ message: `Failed to query sandbox dump URL: ${error.message}` }));
     });
 
@@ -223,6 +236,6 @@ Promise.join(requestPortal.get(URL.LOGIN), read({ prompt: `'${urlParse(BASE_URL)
 
   return new Promise((resolve, reject) => server.on('error', reject).on('listening', resolve).listen(LISTEN.PORT, LISTEN.HOST));
 }).then(() => {
-  serverTiming = process.hrtime();
+  serverStartTime = process.hrtime();
   l('Ready!');
 });

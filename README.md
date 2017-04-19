@@ -23,7 +23,6 @@ To run the service, you need to make sure you added the `include` directive to y
 
 ```sh
 npm start # you can use 'screen', then enter your dev portal login and password
-
 ```
 
 To uninstall (from `/var/sb-mremote`): `npm run uninstall # requires confirmation`

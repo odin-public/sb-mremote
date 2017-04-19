@@ -76,7 +76,19 @@ function getConfig(event) {
   fetchSBDump('.').then(response => {
     const { status } = response;
 
-    if (status !== HTTP.OK) throw new Error(`Daemon returned HTTP code '${status}' (should be '${HTTP.OK}')`);
+    if (status !== HTTP.OK) {
+      return response.text().then(body => {
+        let errorMessage = `Daemon returned HTTP code '${status}' (should be '${HTTP.OK}')`;
+
+        try {
+          errorMessage += `, message: ${JSON.parse(body).message}`;
+        } catch(_) {
+          errorMessage += `, body: ${body}`;
+        }
+        
+        throw new Error(errorMessage);
+      });
+    }
 
     return response.json();
   }).then(dump => {

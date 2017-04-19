@@ -1,5 +1,8 @@
 {
-  "strictSSL": false,
+  "requsetOptions": {
+    "strictSSL": false,
+    "timeout": 30000
+  },
   "proxyRealIPHeader": "x-forwarded-for",
   "listen": {
     "host": "0.0.0.0",
