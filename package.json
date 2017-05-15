@@ -1,6 +1,6 @@
 {
   "name": "sb-mremote",
-  "version": "0.9.4",
+  "version": "0.9.5",
   "description": "Processes 'apsdemo.org' sandbox configurations and turns them into an mRemoteNG config",
   "main": "daemon/daemon.js",
   "scripts": {
