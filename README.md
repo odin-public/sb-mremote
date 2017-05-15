@@ -8,7 +8,7 @@ To install:
 
 npm i sb-mremote
 
-# from source, from source directory into `/var/sb-mremote`
+# from source, from source directory into '/var/sb-mremote'
 
 npm run install
 ```

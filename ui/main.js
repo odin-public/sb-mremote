@@ -16,6 +16,7 @@ const KEY_ENTER = 13,
   },
   SB_DUMP_LOCATION = urlResolve(window.location.href, 'daemon/'),
   BUTTON_TEXT = start.textContent,
+  perf = window.performance,
   l = new class {
 
     _button = start;
@@ -70,7 +71,10 @@ function fetchSBDump(input, init) {
 function getConfig(event) {
   event.preventDefault();
   start.disabled = true;
-  l.info('Working... Note: your browser may hang at various stages of the process. This is considered normal!');
+  l.info('Working... <i>Note: your browser may hang at various stages of the process. This is considered normal!</i>');
+
+  const dumpRequestTime = perf.now();
+
   l.button('Dump request sent...');
 
   fetchSBDump('.').then(response => {
@@ -117,6 +121,7 @@ function getConfig(event) {
 
     l.success('Success! Download the config, right-click \'Connections\' mRemoteNG node and click \'Import\', then select it!');
   }).catch(({ message }) => l.error(message)).finally(() => {
+    l.info(`Time spent on the last operation: ${(perf.now() - dumpRequestTime) / 1000} seconds.`);
     start.disabled = false;
     l.button(BUTTON_TEXT, null);
   });
@@ -132,7 +137,7 @@ fetchSBDump('uptime').then(response => {
   response.json().then(({ message }) => {
     l.button(BUTTON_TEXT, null)
     start.disabled = false;
-    l.info(`Daemon is ready (up for ${moment.duration(message, 'seconds').humanize()})!`);
+    l.info(`Daemon is ready (up for <b>${moment.duration(message, 'seconds').humanize()}</b>)!`);
   });
 });
 

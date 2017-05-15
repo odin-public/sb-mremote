@@ -4,7 +4,7 @@ import { randomBytes, createCipheriv } from 'crypto';
 import { Buffer } from 'buffer';
 
 import util from './util.js';
-import { xml, configNodes } from './static.json';
+import { xml, configVEs } from './static.json';
 
 const DEFAULT_PROTOCOL = 'ssh',
   UNKNOWN_NODE_ATTRIBUTES = { Name: 'Unknown Node', Hostname: 'unknown.apsdemo.org' },
@@ -43,7 +43,8 @@ function processDump(dump, form, l) {
     unknownConfigs = {};
 
   dump.forEach(sandbox => {
-    let { admins, configuration, developers, ip, lastUsed, name, node, password, pba, persistent, poa, provisionStatus, requestor, status } = sandbox,
+    let // full list: { admins, configuration, developers, ip, lastUsed, name, node, password, pba, persistent, poa, provisionStatus, requestor, status } = sandbox,
+      { configuration, name, node, password, pba, poa } = sandbox,
       hostname = name,
       nameParts = name.split('.'),
       organization = nameParts[1];
@@ -60,8 +61,8 @@ function processDump(dump, form, l) {
 
     if (organizationFolder.length === 0) organizationIDs.push(organization);
 
-    if (configuration in configNodes) {
-      Object.assign(nodes, configNodes[configuration])
+    if (configuration in configVEs) {
+      Object.assign(nodes, configVEs[configuration])
     } else {
       createOrGet(unknownConfigs, configuration, []).push(sandbox);
     }
@@ -99,6 +100,8 @@ function processDump(dump, form, l) {
     console.error(unknownConfigs);
     l.error('Some unknown sandbox configurations were found. Take a look at the console!');
   }
+
+  l.info(`Found ${organizationIDs.length} organizations!`);
 
   organizationIDs.sort().forEach(organizationID => { 
     const containerItem = result[organizationID] = xmlItem.container(),

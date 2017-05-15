@@ -11,7 +11,7 @@
       "rdp": { "Protocol":"RDP","Port":"3389","Username":"Administrator" }
     }
   },
-  "configNodes": {
+  "configVEs": {
     "demo-dp4": {
       "ep": ["endpoint"],
       "pba": ["pba"],
@@ -112,6 +112,16 @@
     "lin-mn-nextcp": {
       "ep": ["endpoint"]
     },
+    "lin-mn-pba-bi": {
+      "bibackend": ["bibackend"],
+      "bidb": ["bidb"],
+      "nifi": ["nifi"],
+      "pba": ["pba"],
+      "pbadb": ["pbadb"],
+      "pbadbrl": ["pbadbrl"],
+      "pemdbrl": ["pemdbrl"],
+      "store": ["store"]
+    },
     "lin-mn-pba-office365-pups-owncloud": {
       "ep": ["endpoint"],
       "pba": ["pba"]
@@ -155,6 +165,18 @@
       "pbadb": ["pbadb"],
       "store": ["store"]
     },
+    "lin-pba-o365csp": {
+      "dns": ["dns"],
+      "pba": ["pba"],
+      "pbadb": ["pbadb"],
+      "store": ["store"]
+    },
+    "lin-pba-o365csp-exch2013": {
+      "dns": ["dns"],
+      "pba": ["pba"],
+      "pbadb": ["pbadb"],
+      "store": ["store"]
+    },
     "lin-qmail": {
       "dns": ["dns"],
       "drweb": ["drweb"],
@@ -166,6 +188,17 @@
       "qmail": ["qmail"],
       "spas": ["spamassassin"]
     },
+    "lin-qmail-iis-pba": {
+      "ad1": ["ad1", "rdp"],
+      "dns": ["dns"],
+      "ep": ["endpoint"],
+      "iis71": ["iis71", "rdp"],
+      "pba": ["pba"],
+      "pbadb": ["pbadb"],
+      "qmail": ["qmail"],
+      "store": ["store"],
+      "wpe": ["wpe", "rdp"]
+    },
     "o365-ng-qmail": {
       "cp": ["cp"],
       "dns": ["dns"],
@@ -173,6 +206,12 @@
       "pba": ["pba"],
       "pbadb": ["pbadb"],
       "store": ["store"]
+    },
+    "oae-demo-2017": {
+      "dns": ["dns"],
+      "pcs": ["pcs"],
+      "pcs-backup": ["pcs-backup"],
+      "shm": ["shm"]
     },
     "phoenix65-demodp": {},
     "win-mn": {
