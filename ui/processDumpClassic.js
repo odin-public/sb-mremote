@@ -44,7 +44,7 @@ function processDump(dump, form, l) {
 
   dump.forEach(sandbox => {
     let // full list: { admins, configuration, developers, ip, lastUsed, name, node, password, pba, persistent, poa, provisionStatus, requestor, status } = sandbox,
-      { configuration, name, node, password, pba, poa } = sandbox,
+      { configuration, ip, name, node, password, pba, poa } = sandbox,
       hostname = name,
       nameParts = name.split('.'),
       organization = nameParts[1];

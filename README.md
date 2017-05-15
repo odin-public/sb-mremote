@@ -15,7 +15,7 @@ npm run install
 
 Then follow the on-screen instructions:
 
-![](https://i.imgur.com/5sFAMtC.png)
+![](https://i.imgur.com/mWpLXUK.png)
 
 **You can remove the working directory after the installation, it won't affect the service.**
 
