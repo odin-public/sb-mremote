@@ -31,4 +31,4 @@ fi
 cd .. && { npm prune --production=true || exit 1; }
 
 echo "Success! Use 'npm run install' to install..."
-popd
+popd > /dev/null

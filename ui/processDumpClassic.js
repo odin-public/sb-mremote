@@ -44,7 +44,7 @@ function processDump(dump, form, l) {
 
   dump.forEach(sandbox => {
     let // full list: { admins, configuration, developers, ip, lastUsed, name, node, password, pba, persistent, poa, provisionStatus, requestor, status } = sandbox,
-      { configuration, ip, name, node, password, pba, poa } = sandbox,
+      { configuration, ip, name, node, password, pba, poa, provisionStatus } = sandbox,
       hostname = name,
       nameParts = name.split('.'),
       organization = nameParts[1];
@@ -63,7 +63,7 @@ function processDump(dump, form, l) {
 
     if (configuration in configVEs) {
       Object.assign(nodes, configVEs[configuration])
-    } else {
+    } else if (provisionStatus.alias !== 'Null') {
       createOrGet(unknownConfigs, configuration, []).push(sandbox);
     }
 
